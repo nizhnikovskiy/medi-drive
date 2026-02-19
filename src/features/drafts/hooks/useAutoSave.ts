@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { UseFormWatch } from 'react-hook-form';
 import { ServiceLogFormValues } from '@/types/serviceLog';
+import { AUTO_SAVE_DEBOUNCE_MS, SAVED_INDICATOR_MS } from '@/constants';
 
 export type AutoSaveStatus = 'idle' | 'saving' | 'saved';
 
@@ -13,7 +14,7 @@ interface UseAutoSaveProps {
 export const useAutoSave = ({
   watch,
   onAutoSave,
-  debounceMs = 750,
+  debounceMs = AUTO_SAVE_DEBOUNCE_MS,
 }: UseAutoSaveProps) => {
   const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>('idle');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -41,7 +42,7 @@ export const useAutoSave = ({
 
         savedRef.current = setTimeout(() => {
           setAutoSaveStatus('idle');
-        }, 2000);
+        }, SAVED_INDICATOR_MS);
       }, debounceMs);
     });
 

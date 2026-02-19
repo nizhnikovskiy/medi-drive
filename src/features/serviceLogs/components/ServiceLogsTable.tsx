@@ -6,45 +6,34 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Typography,
-  Box,
 } from '@mui/material';
 import { ListAlt } from '@mui/icons-material';
 import { ServiceLogEntry } from '@/types/serviceLog';
+import { formatDate, capitalize, truncate } from '@/utils/format';
+import { EmptyState } from '@/components/feedback/EmptyState';
 
 interface ServiceLogsTableProps {
   logs: ServiceLogEntry[];
   onRowClick: (id: string) => void;
 }
 
-const formatDate = (iso: string) => {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-};
-
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
-const truncate = (s: string, max = 60) =>
-  s.length > max ? `${s.slice(0, max)}…` : s || '—';
-
 export const ServiceLogsTable = ({ logs, onRowClick }: ServiceLogsTableProps) => {
   if (logs.length === 0) {
     return (
-      <Box sx={{ textAlign: 'center', py: 8, px: 3 }}>
-        <ListAlt sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
-        <Typography variant="h6" color="text.secondary" gutterBottom>
-          No service logs found
-        </Typography>
-        <Typography variant="body2" color="text.disabled">
-          Completed service logs will appear here. Try adjusting your filters.
-        </Typography>
-      </Box>
+      <EmptyState
+        icon={<ListAlt sx={{ fontSize: 48 }} />}
+        title="No service logs found"
+        description="Completed service logs will appear here. Try adjusting your filters."
+      />
     );
   }
+
+  const handleRowKeyDown = (id: string) => (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onRowClick(id);
+    }
+  };
 
   return (
     <TableContainer component={Paper} variant="outlined">
@@ -66,6 +55,9 @@ export const ServiceLogsTable = ({ logs, onRowClick }: ServiceLogsTableProps) =>
               key={log.id}
               hover
               onClick={() => onRowClick(log.id)}
+              onKeyDown={handleRowKeyDown(log.id)}
+              tabIndex={0}
+              role="button"
               sx={{ cursor: 'pointer' }}
             >
               <TableCell>{log.providerId || '—'}</TableCell>

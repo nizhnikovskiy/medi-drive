@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { Snackbar, Alert, AlertColor, Grow } from '@mui/material';
+import { SNACKBAR_AUTO_HIDE_MS } from '@/constants';
 
 interface SnackbarContextType {
   showSnackbar: (message: string, severity?: AlertColor) => void;
@@ -40,19 +41,19 @@ export const SnackbarProvider = ({ children }: SnackbarProviderProps) => {
     });
   }, []);
 
-  const handleClose = (_event?: React.SyntheticEvent | Event, reason?: string) => {
+  const handleClose = useCallback((_event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return;
     }
     setSnackbar((prev) => ({ ...prev, open: false }));
-  };
+  }, []);
 
   return (
     <SnackbarContext.Provider value={{ showSnackbar }}>
       {children}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={4000}
+        autoHideDuration={SNACKBAR_AUTO_HIDE_MS}
         onClose={handleClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         TransitionComponent={Grow}

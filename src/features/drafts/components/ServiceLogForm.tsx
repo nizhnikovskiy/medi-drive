@@ -23,42 +23,57 @@ import {
 } from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { ServiceLogFormValues, ServiceType } from '@/types/serviceLog.ts';
+import { ServiceLogFormValues } from '@/types/serviceLog.ts';
 import { serviceLogSchema } from '@/validation/serviceLogSchema.ts';
 import { FormTextField } from '@/components/form/FormTextField.tsx';
 import { FormSelect } from '@/components/form/FormSelect.tsx';
 import { FormDatePicker } from '@/components/form/FormDatePicker.tsx';
+import { SERVICE_TYPE_OPTIONS } from '@/constants';
 import { useDateSync } from '../hooks/useDateSync';
 import { DraftStatusIndicator } from './DraftStatusIndicator';
 import { getEmptyFormValues } from '../constants';
 import { useServiceLogFormActions } from '../hooks/useServiceLogFormActions';
 import { useAutoSave } from '../hooks/useAutoSave';
 
-const serviceTypeOptions = [
-  { value: ServiceType.Planned, label: 'Planned' },
-  { value: ServiceType.Unplanned, label: 'Unplanned' },
-  { value: ServiceType.Emergency, label: 'Emergency' },
-];
-
-export type ServiceLogFormMode = 'create' | 'editDraft' | 'editLog';
-
-export interface ServiceLogFormProps {
+interface CreateModeProps {
+  mode?: 'create';
   initialValues?: ServiceLogFormValues;
-  mode?: ServiceLogFormMode;
-  onAutoSave?: (data: ServiceLogFormValues) => void;
-  onSubmit?: (data: ServiceLogFormValues) => void;
-  onDelete?: () => void;
-  onClose?: () => void;
+  onAutoSave?: undefined;
+  onSubmit?: undefined;
+  onDelete?: undefined;
+  onClose?: undefined;
 }
 
-export const ServiceLogForm = ({
-  initialValues,
-  mode = 'create',
-  onAutoSave,
-  onSubmit: onSubmitProp,
-  onDelete,
-  onClose,
-}: ServiceLogFormProps) => {
+interface EditDraftModeProps {
+  mode: 'editDraft';
+  initialValues: ServiceLogFormValues;
+  onAutoSave: (data: ServiceLogFormValues) => void;
+  onSubmit: (data: ServiceLogFormValues) => void;
+  onDelete: () => void;
+  onClose: () => void;
+}
+
+interface EditLogModeProps {
+  mode: 'editLog';
+  initialValues: ServiceLogFormValues;
+  onAutoSave?: undefined;
+  onSubmit: (data: ServiceLogFormValues) => void;
+  onDelete: () => void;
+  onClose: () => void;
+}
+
+export type ServiceLogFormProps = CreateModeProps | EditDraftModeProps | EditLogModeProps;
+
+export const ServiceLogForm = (props: ServiceLogFormProps) => {
+  const {
+    initialValues,
+    mode = 'create',
+    onAutoSave,
+    onSubmit: onSubmitProp,
+    onDelete,
+    onClose,
+  } = props;
+
   const isCreate = mode === 'create';
 
   const {
@@ -176,7 +191,7 @@ export const ServiceLogForm = ({
               name="type"
               control={control}
               label="Service Type"
-              options={serviceTypeOptions}
+              options={SERVICE_TYPE_OPTIONS}
             />
             <Box
               sx={{
