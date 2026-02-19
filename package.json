@@ -6,8 +6,8 @@
   "license": "UNLICENSED",
   "homepage": "https://nizhnikovskiy.github.io/medi-drive",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "node api.js && vite",
+    "build": "node api.js && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
