@@ -7,20 +7,19 @@ const serviceLogsAdapter = createEntityAdapter({
   sortComparer: (a: ServiceLogEntry, b: ServiceLogEntry) => b.createdAt.localeCompare(a.createdAt),
 });
 
-const buildEntry = (
+export const buildEntry = (
   payload: ServiceLogFormValues,
   status: ServiceLogStatus,
-): ServiceLogEntry => {
-  const now = new Date().toISOString();
-  return {
-    ...payload,
-    kind: 'serviceLog',
-    status,
-    id: nanoid(),
-    createdAt: now,
-    updatedAt: now,
-  };
-};
+  id: string = nanoid(),
+  now: string = new Date().toISOString(),
+): ServiceLogEntry => ({
+  ...payload,
+  kind: 'serviceLog',
+  status,
+  id,
+  createdAt: now,
+  updatedAt: now,
+});
 
 interface ServiceLogsState {
   currentFormState: ServiceLogFormValues | null;

@@ -1,6 +1,7 @@
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Controller, Control, FieldValues, Path } from 'react-hook-form';
 import dayjs, { Dayjs } from 'dayjs';
+import { DATE_FORMAT } from '@/constants';
 
 interface FormDatePickerProps<T extends FieldValues> {
   name: Path<T>;
@@ -22,7 +23,7 @@ export const FormDatePicker = <T extends FieldValues>({
           label={label}
           value={field.value ? dayjs(field.value) : null}
           onChange={(date: Dayjs | null) => {
-            field.onChange(date ? date.format('YYYY-MM-DD') : '');
+            field.onChange(date ? date.format(DATE_FORMAT) : '');
           }}
           slotProps={{
             textField: {

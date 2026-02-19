@@ -4,6 +4,7 @@ import { AppHeader } from './AppHeader';
 import { SnackbarProvider } from '../feedback/SnackbarProvider';
 import { CreateServiceLogView } from '../../features/drafts/components/CreateServiceLogView';
 import { ServiceLogsHub } from '../../features/serviceLogs/components/ServiceLogsHub';
+import { FADE_TIMEOUT_MS } from '@/constants';
 
 export const AppShell = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -28,13 +29,13 @@ export const AppShell = () => {
             flexGrow: 1,
           }}
         >
-          <Fade in={activeTab === 0} timeout={300} unmountOnExit>
+          <Fade in={activeTab === 0} timeout={FADE_TIMEOUT_MS} unmountOnExit>
             <Box>
               <CreateServiceLogView />
             </Box>
           </Fade>
           
-          <Fade in={activeTab === 1} timeout={300} unmountOnExit>
+          <Fade in={activeTab === 1} timeout={FADE_TIMEOUT_MS} unmountOnExit>
             <Box>
               <ServiceLogsHub />
             </Box>

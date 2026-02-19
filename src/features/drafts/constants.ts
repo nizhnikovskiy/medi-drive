@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
-import { ServiceLogFormValues, ServiceType } from '../../types/serviceLog';
+import { ServiceLogFormValues, ServiceType } from '@/types/serviceLog.ts';
+import { DATE_FORMAT } from '@/constants';
 
 export const getEmptyFormValues = (): ServiceLogFormValues => ({
   providerId: '',
@@ -7,8 +8,8 @@ export const getEmptyFormValues = (): ServiceLogFormValues => ({
   carId: '',
   odometer: '',
   engineHours: '',
-  startDate: dayjs().format('YYYY-MM-DD'),
-  endDate: dayjs().add(1, 'day').format('YYYY-MM-DD'),
+  startDate: dayjs().format(DATE_FORMAT),
+  endDate: dayjs().add(1, 'day').format(DATE_FORMAT),
   type: ServiceType.Planned,
   serviceDescription: '',
 });

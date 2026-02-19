@@ -4,6 +4,7 @@ import { DeleteSweep } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { clearAllDrafts, selectDrafts } from '@/features/serviceLogs/serviceLogsSlice';
 import { useSnackbar } from '@/components/feedback/SnackbarProvider';
+import { ConfirmDialog } from '@/components/feedback/ConfirmDialog';
 import { DraftsTable } from './DraftsTable';
 import { DraftEditDialog } from './DraftEditDialog';
 
@@ -13,11 +14,16 @@ export const DraftsView = () => {
   const drafts = useAppSelector(selectDrafts);
 
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleClearAll = () => {
-    if (drafts.length === 0) return;
-    dispatch(clearAllDrafts());
-    showSnackbar('All drafts cleared', 'info');
+    try {
+      dispatch(clearAllDrafts());
+      showSnackbar('All drafts cleared', 'info');
+    } catch {
+      showSnackbar('Failed to clear drafts', 'error');
+    }
+    setConfirmOpen(false);
   };
 
   return (
@@ -32,7 +38,7 @@ export const DraftsView = () => {
               startIcon={<DeleteSweep />}
               variant="outlined"
               color="warning"
-              onClick={handleClearAll}
+              onClick={() => setConfirmOpen(true)}
               disabled={drafts.length === 0}
               size="small"
             >
@@ -50,6 +56,16 @@ export const DraftsView = () => {
           onClose={() => setSelectedDraftId(null)}
         />
       )}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Clear All Drafts"
+        message={`Are you sure you want to delete all ${drafts.length} drafts? This action cannot be undone.`}
+        confirmLabel="Clear All"
+        confirmColor="warning"
+        onConfirm={handleClearAll}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </Box>
   );
 };
