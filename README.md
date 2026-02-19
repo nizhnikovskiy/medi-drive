@@ -219,4 +219,6 @@ export default theme
 
 ## License
 
-MIT
+Copyright (c) 2026 Ivan Nizhnikovskyi. All Rights Reserved.
+
+This is proprietary software. No license is granted for use, modification, distribution, or data access without prior written permission from the copyright holder. See the [LICENSE](./LICENSE) file for full terms.
