@@ -1,12 +1,4 @@
-import { useCallback } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  IconButton,
-  Typography,
-} from '@mui/material';
-import { Close } from '@mui/icons-material';
+import { useState, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import {
   updateServiceLog,
@@ -15,7 +7,10 @@ import {
 } from '@/features/serviceLogs/serviceLogsSlice';
 import { ServiceLogFormValues } from '@/types/serviceLog';
 import { useSnackbar } from '@/components/feedback/SnackbarProvider';
+import { FormDialog } from '@/components/feedback/FormDialog';
+import { ConfirmDialog } from '@/components/feedback/ConfirmDialog';
 import { ServiceLogForm } from '@/features/drafts/components/ServiceLogForm';
+import { toFormValues } from '@/utils/serviceLog';
 
 interface ServiceLogEditDialogProps {
   logId: string;
@@ -25,6 +20,7 @@ interface ServiceLogEditDialogProps {
 export const ServiceLogEditDialog = ({ logId, onClose }: ServiceLogEditDialogProps) => {
   const dispatch = useAppDispatch();
   const { showSnackbar } = useSnackbar();
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const log = useAppSelector((state) =>
     serviceLogsSelectors.selectById(state, logId)
@@ -32,60 +28,49 @@ export const ServiceLogEditDialog = ({ logId, onClose }: ServiceLogEditDialogPro
 
   const handleSave = useCallback(
     (data: ServiceLogFormValues) => {
-      dispatch(updateServiceLog({ id: logId, changes: data }));
-      showSnackbar('Service log updated', 'success');
-      onClose();
+      try {
+        dispatch(updateServiceLog({ id: logId, changes: data }));
+        showSnackbar('Service log updated', 'success');
+        onClose();
+      } catch {
+        showSnackbar('Failed to update service log', 'error');
+      }
     },
     [dispatch, logId, showSnackbar, onClose]
   );
 
   const handleDelete = useCallback(() => {
-    dispatch(deleteServiceLog(logId));
-    showSnackbar('Service log deleted', 'info');
-    onClose();
+    try {
+      dispatch(deleteServiceLog(logId));
+      showSnackbar('Service log deleted', 'info');
+      onClose();
+    } catch {
+      showSnackbar('Failed to delete service log', 'error');
+    }
   }, [dispatch, logId, showSnackbar, onClose]);
 
   if (!log) return null;
 
-  const initialValues: ServiceLogFormValues = {
-    providerId: log.providerId,
-    serviceOrder: log.serviceOrder,
-    carId: log.carId,
-    odometer: log.odometer,
-    engineHours: log.engineHours,
-    startDate: log.startDate,
-    endDate: log.endDate,
-    type: log.type,
-    serviceDescription: log.serviceDescription,
-  };
-
   return (
-    <Dialog open fullWidth maxWidth="lg" onClose={onClose}>
-      <DialogTitle
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          pb: 1,
-        }}
-      >
-        <Typography variant="h6" component="span">
-          Edit Service Log
-        </Typography>
-        <IconButton onClick={onClose} size="small" aria-label="close">
-          <Close />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent dividers sx={{ pt: 2 }}>
+    <>
+      <FormDialog title="Edit Service Log" onClose={onClose}>
         <ServiceLogForm
           key={logId}
-          initialValues={initialValues}
+          initialValues={toFormValues(log)}
           mode="editLog"
           onSubmit={handleSave}
-          onDelete={handleDelete}
+          onDelete={() => setConfirmOpen(true)}
           onClose={onClose}
         />
-      </DialogContent>
-    </Dialog>
+      </FormDialog>
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Delete Service Log"
+        message="Are you sure you want to delete this service log? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmOpen(false)}
+      />
+    </>
   );
 };

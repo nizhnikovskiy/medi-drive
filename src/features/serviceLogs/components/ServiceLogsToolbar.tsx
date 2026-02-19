@@ -10,12 +10,7 @@ import { Search } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs, { Dayjs } from 'dayjs';
 import { ServiceType } from '@/types/serviceLog';
-
-const SERVICE_TYPE_OPTIONS: { value: ServiceType; label: string }[] = [
-  { value: ServiceType.Planned, label: 'Planned' },
-  { value: ServiceType.Unplanned, label: 'Unplanned' },
-  { value: ServiceType.Emergency, label: 'Emergency' },
-];
+import { SERVICE_TYPE_OPTIONS, DATE_FORMAT } from '@/constants';
 
 export interface ServiceLogsFilters {
   search: string;
@@ -49,11 +44,11 @@ export const ServiceLogsToolbar = ({
   };
 
   const handleDateFrom = (date: Dayjs | null) => {
-    onChange({ ...filters, dateFrom: date ? date.format('YYYY-MM-DD') : null });
+    onChange({ ...filters, dateFrom: date ? date.format(DATE_FORMAT) : null });
   };
 
   const handleDateTo = (date: Dayjs | null) => {
-    onChange({ ...filters, dateTo: date ? date.format('YYYY-MM-DD') : null });
+    onChange({ ...filters, dateTo: date ? date.format(DATE_FORMAT) : null });
   };
 
   const isFiltered =
@@ -61,6 +56,11 @@ export const ServiceLogsToolbar = ({
     filters.types.length > 0 ||
     filters.dateFrom !== null ||
     filters.dateTo !== null;
+
+  const logLabel = totalCount === 1 ? 'log' : 'logs';
+  const countText = isFiltered
+    ? `${filteredCount} of ${totalCount} ${logLabel}`
+    : `${totalCount} ${logLabel}`;
 
   return (
     <Stack spacing={2} sx={{ mb: 2 }}>
@@ -122,16 +122,9 @@ export const ServiceLogsToolbar = ({
           />
         ))}
 
-        {isFiltered && (
-          <Typography variant="body2" color="text.secondary" sx={{ ml: 'auto' }}>
-            {filteredCount} of {totalCount} {totalCount === 1 ? 'log' : 'logs'}
-          </Typography>
-        )}
-        {!isFiltered && (
-          <Typography variant="body2" color="text.secondary" sx={{ ml: 'auto' }}>
-            {totalCount} {totalCount === 1 ? 'log' : 'logs'}
-          </Typography>
-        )}
+        <Typography variant="body2" color="text.secondary" sx={{ ml: 'auto' }}>
+          {countText}
+        </Typography>
       </Box>
     </Stack>
   );

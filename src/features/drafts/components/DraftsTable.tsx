@@ -6,53 +6,34 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Typography,
-  Box,
 } from '@mui/material';
 import { EditNote } from '@mui/icons-material';
 import { ServiceLogEntry } from '@/types/serviceLog';
+import { formatDate, formatDateTime, capitalize } from '@/utils/format';
+import { EmptyState } from '@/components/feedback/EmptyState';
 
 interface DraftsTableProps {
   drafts: ServiceLogEntry[];
   onRowClick: (id: string) => void;
 }
 
-const formatDate = (iso: string) => {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-};
-
-const formatDateTime = (iso: string) => {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
 export const DraftsTable = ({ drafts, onRowClick }: DraftsTableProps) => {
   if (drafts.length === 0) {
     return (
-      <Box sx={{ textAlign: 'center', py: 8, px: 3 }}>
-        <EditNote sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
-        <Typography variant="h6" color="text.secondary" gutterBottom>
-          No drafts yet
-        </Typography>
-        <Typography variant="body2" color="text.disabled">
-          Drafts you save from the Create tab will appear here.
-        </Typography>
-      </Box>
+      <EmptyState
+        icon={<EditNote sx={{ fontSize: 48 }} />}
+        title="No drafts yet"
+        description="Drafts you save from the Create tab will appear here."
+      />
     );
   }
+
+  const handleRowKeyDown = (id: string) => (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onRowClick(id);
+    }
+  };
 
   return (
     <TableContainer component={Paper} variant="outlined">
@@ -73,6 +54,9 @@ export const DraftsTable = ({ drafts, onRowClick }: DraftsTableProps) => {
               key={draft.id}
               hover
               onClick={() => onRowClick(draft.id)}
+              onKeyDown={handleRowKeyDown(draft.id)}
+              tabIndex={0}
+              role="button"
               sx={{ cursor: 'pointer' }}
             >
               <TableCell>{draft.providerId || '—'}</TableCell>

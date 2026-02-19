@@ -41,19 +41,25 @@ export const useServiceLogFormActions = ({
     onAutoSave: enabled ? handleAutoSave : undefined,
   });
 
-  // Resume form state from Redux on mount
+  // Restore persisted form state on initial mount only.
+  // deps are deliberately empty — this is a one-time mount restoration.
+  const initialFormStateRef = useRef(currentFormState);
   useEffect(() => {
-    if (enabled && currentFormState) {
-      reset(currentFormState);
+    if (enabled && initialFormStateRef.current) {
+      reset(initialFormStateRef.current);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [enabled, reset]);
 
   const onSubmit = useCallback(
     (data: ServiceLogFormValues) => {
-      dispatch(addServiceLog(data));
-      dispatch(setCurrentFormState(null));
-      reset(getEmptyFormValues());
-      showSnackbar('Service log created successfully', 'success');
+      try {
+        dispatch(addServiceLog(data));
+        dispatch(setCurrentFormState(null));
+        reset(getEmptyFormValues());
+        showSnackbar('Service log created successfully', 'success');
+      } catch {
+        showSnackbar('Failed to create service log', 'error');
+      }
     },
     [dispatch, reset, showSnackbar]
   );
@@ -66,22 +72,26 @@ export const useServiceLogFormActions = ({
     const formData = watch();
 
     const hasContent =
-      formData.providerId.trim() !== '' ||
-      formData.serviceOrder.trim() !== '' ||
-      formData.carId.trim() !== '' ||
+      formData.providerId?.trim() !== '' ||
+      formData.serviceOrder?.trim() !== '' ||
+      formData.carId?.trim() !== '' ||
       formData.odometer !== '' ||
       formData.engineHours !== '' ||
-      formData.serviceDescription.trim() !== '';
+      formData.serviceDescription?.trim() !== '';
 
     if (!hasContent) {
       showSnackbar('Cannot save empty draft', 'warning');
       return;
     }
 
-    dispatch(addDraft(formData as ServiceLogFormValues));
-    dispatch(setCurrentFormState(null));
-    reset(getEmptyFormValues());
-    showSnackbar('Draft saved successfully', 'success');
+    try {
+      dispatch(addDraft(formData as ServiceLogFormValues));
+      dispatch(setCurrentFormState(null));
+      reset(getEmptyFormValues());
+      showSnackbar('Draft saved successfully', 'success');
+    } catch {
+      showSnackbar('Failed to save draft', 'error');
+    }
   }, [dispatch, reset, showSnackbar, watch]);
 
   const handleClearAll = useCallback(() => {
@@ -89,6 +99,7 @@ export const useServiceLogFormActions = ({
     reset(getEmptyFormValues());
   }, [dispatch, reset]);
 
+  // Keyboard shortcuts — refs avoid stale closures without extra effect re-runs
   const handleCreateRef = useRef(handleCreateServiceLog);
   const handleSaveDraftRef = useRef(handleSaveDraft);
 
