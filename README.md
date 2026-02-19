@@ -17,16 +17,23 @@ A modern React application built with TypeScript, Material-UI, and Redux Toolkit
 ```
 src/
 ├── app/
-│   ├── store.ts         # Redux store configuration
-│   ├── rootReducer.ts   # Combined reducers
-│   └── hooks.ts         # Typed Redux hooks (useAppDispatch, useAppSelector)
-├── features/            # Redux slices (feature-based modules)
+│   ├── store.ts             # Redux store with redux-persist
+│   ├── rootReducer.ts       # Combined reducers
+│   └── hooks.ts             # Typed Redux hooks (useAppDispatch, useAppSelector)
+├── components/
+│   ├── feedback/            # Snackbar notifications
+│   ├── form/                # Reusable form controls (TextField, Select, DatePicker)
+│   └── layout/              # AppShell, AppHeader
+├── features/
+│   ├── drafts/              # Draft creation, editing, auto-save, table & dialog
+│   └── serviceLogs/         # Completed logs table, filtering, edit dialog, Redux slice
 ├── theme/
-│   └── theme.ts         # MUI theme configuration
-├── components/          # Shared/reusable components
-├── pages/               # Page-level components
-├── App.tsx              # Root component
-└── main.tsx             # Application entry point
+│   ├── theme.ts             # MUI theme configuration
+│   └── ThemeContextProvider.tsx  # Light/dark mode toggle
+├── types/                   # Shared TypeScript types
+├── validation/              # Yup schemas
+├── App.tsx                  # Root component
+└── main.tsx                 # Application entry point
 ```
 
 ## Getting Started

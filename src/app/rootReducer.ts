@@ -1,8 +1,10 @@
-import { combineReducers } from '@reduxjs/toolkit'
+import { combineReducers } from '@reduxjs/toolkit';
+import serviceLogsReducer from '../features/serviceLogs/serviceLogsSlice';
 
 const rootReducer = combineReducers({
-  // Add your slices here
-  // example: auth: authReducer,
-})
+  serviceLogs: serviceLogsReducer,
+});
 
-export default rootReducer
+export type RootState = ReturnType<typeof rootReducer>;
+
+export default rootReducer;

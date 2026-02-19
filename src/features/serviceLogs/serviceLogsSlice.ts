@@ -1,6 +1,6 @@
-import { createSlice, createEntityAdapter, PayloadAction, nanoid } from '@reduxjs/toolkit';
-import { ServiceLogEntry, ServiceLogFormValues, ServiceLogStatus } from '../../types/serviceLog';
-import type { RootState } from '../../app/rootReducer';
+import { createSlice, createEntityAdapter, createSelector, PayloadAction, nanoid } from '@reduxjs/toolkit';
+import { ServiceLogEntry, ServiceLogFormValues, ServiceLogStatus } from '@/types/serviceLog.ts';
+import type { RootState } from '@/app/rootReducer.ts';
 
 const serviceLogsAdapter = createEntityAdapter({
   selectId: (log: ServiceLogEntry) => log.id,
@@ -22,7 +22,13 @@ const buildEntry = (
   };
 };
 
-const initialState = serviceLogsAdapter.getInitialState();
+interface ServiceLogsState {
+  currentFormState: ServiceLogFormValues | null;
+}
+
+const initialState = serviceLogsAdapter.getInitialState<ServiceLogsState>({
+  currentFormState: null,
+});
 
 const serviceLogsSlice = createSlice({
   name: 'serviceLogs',
@@ -50,6 +56,27 @@ const serviceLogsSlice = createSlice({
     deleteServiceLog: (state, action: PayloadAction<string>) => {
       serviceLogsAdapter.removeOne(state, action.payload);
     },
+    setCurrentFormState: (state, action: PayloadAction<ServiceLogFormValues | null>) => {
+      state.currentFormState = action.payload;
+    },
+    clearAllDrafts: (state) => {
+      const draftIds = Object.values(state.entities)
+        .filter((entity): entity is ServiceLogEntry => 
+          entity !== undefined && entity.status === ServiceLogStatus.Draft
+        )
+        .map((entity) => entity.id);
+      serviceLogsAdapter.removeMany(state, draftIds);
+    },
+    promoteDraftToLog: (state, action: PayloadAction<string>) => {
+      const id = action.payload;
+      serviceLogsAdapter.updateOne(state, {
+        id,
+        changes: {
+          status: ServiceLogStatus.Completed,
+          updatedAt: new Date().toISOString(),
+        },
+      });
+    },
   },
 });
 
@@ -58,10 +85,24 @@ export const {
   addDraft,
   updateServiceLog,
   deleteServiceLog,
+  setCurrentFormState,
+  clearAllDrafts,
+  promoteDraftToLog,
 } = serviceLogsSlice.actions;
 
 export const serviceLogsSelectors = serviceLogsAdapter.getSelectors<RootState>(
   (state) => state.serviceLogs
+);
+
+export const selectCurrentFormState = (state: RootState) => state.serviceLogs.currentFormState;
+export const selectDrafts = createSelector(
+  serviceLogsSelectors.selectAll,
+  (logs) => logs.filter((log) => log.status === ServiceLogStatus.Draft)
+);
+
+export const selectCompletedLogs = createSelector(
+  serviceLogsSelectors.selectAll,
+  (logs) => logs.filter((log) => log.status === ServiceLogStatus.Completed)
 );
 
 export default serviceLogsSlice.reducer;
